@@ -1,27 +1,29 @@
 package ru.netology.stats.Item.Manager;
 
-public class ProductManager {
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import java.util.Arrays;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public class ProductManager {
     private Repository repository;
 
-    public ProductManager(Repository repository) {
-        this.repository = repository;
-    }
-
     public void add(Product product) {
-        repository.add(product);
-
+        repository.save(product);
     }
 
     public Product[] searchBy(String text) {
         Product[] result = new Product[0];
+        Product[] tmp;
+        int length = 0;
         for (Product product : repository.findAll()) {
             if (matches(product, text)) {
-                Product[] tmp = new Product[result.length + 1];
-                for (int i = 0; i < result.length; i++) {
-                    tmp[i] = result[i];
-                }
-                tmp[tmp.length - 1] = product;
+                length++;
+                tmp = Arrays.copyOf(result, length);
+                tmp[length - 1] = product;
                 result = tmp;
             }
         }
@@ -29,7 +31,6 @@ public class ProductManager {
     }
 
     public boolean matches(Product product, String search) {
-
         return product.getName().contains(search);
     }
 }

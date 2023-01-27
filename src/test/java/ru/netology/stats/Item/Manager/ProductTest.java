@@ -1,53 +1,86 @@
 package ru.netology.stats.Item.Manager;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 public class ProductTest {
-
+    @Mock
+    private Repository repository;
+    @InjectMocks
+    private ProductManager manager;
+    private Book book = new Book(1, "1984", 300, "George Orwell");
+    private Smartphone phone = new Smartphone(2, "Galaxy S21", 75000, "Samsung");
+    private Smartphone newPhone = new Smartphone(3, "iPhone 12", 60000, "Apple");
+    private Product[] returned = new Product[]{book, phone, newPhone};
 
     @Test
+    public void shouldAdd() {
 
-    public void searchTestWhenFewProductFound(){
-        Repository repo = new Repository();
-        ProductManager manager = new ProductManager(repo);
+        manager = new ProductManager(new Repository());
+        manager.add(book);
 
-        Book book1 = new Book(1, "Идиот", 1000, "Ф.М.Достоевский");
-        Book book2 = new Book(2, "HARRY POTTER 1", 2000, "J. K. ROWLING");
-        Book book3 = new Book(3, "HARRY POTTER 2", 1000, "J. K. ROWLING");
-        Smartphone phone = new Smartphone(4, "iPhone 14", 5000, "Apple");
-
-        manager.add(book1);
-        manager.add(book2);
-        manager.add(book3);
-        manager.add(phone);
-
-        Product[] expected = {book2, book3};
-        Product[] actual = manager.searchBy("HARRY");
-
-        Assertions.assertArrayEquals(expected, actual);
-
+        Product[] actual = manager.getRepository().findAll();
+        Product[] expected = new Product[]{book};
+        assertArrayEquals(expected, actual);
     }
 
     @Test
+    public void shouldSearchByAndReturnOneProduct() {
+        doReturn(returned).when(repository).findAll();
 
-    public void searchTestWhenOneProductFound(){
-        Repository repo = new Repository();
-        ProductManager manager = new ProductManager(repo);
-
-        Smartphone phone = new Smartphone(4, "iPhone 14", 5000, "Apple");
-
-        manager.add(phone);
-
-        Product[] expected = {phone};
-        Product[] actual = manager.searchBy("iPhone 14");
-
-        Assertions.assertArrayEquals(expected, actual);
-
-
+        Product[] actual = manager.searchBy("la");
+        Product[] expected = new Product[]{phone};
+        assertArrayEquals(expected, actual);
+        verify(repository).findAll();
     }
 
+    @Test
+    public void shouldSearchByAndReturnSeveralProducts() {
+        doReturn(returned).when(repository).findAll();
 
+        Product[] actual = manager.searchBy("2");
+        Product[] expected = new Product[]{phone, newPhone};
+        assertArrayEquals(expected, actual);
+        verify(repository).findAll();
+    }
 
+    @Test
+    public void shouldSearchByAndReturnAllProducts() {
+        doReturn(returned).when(repository).findAll();
 
+        Product[] actual = manager.searchBy("1");
+        Product[] expected = new Product[]{book, phone, newPhone};
+        assertArrayEquals(expected, actual);
+        verify(repository).findAll();
+    }
+
+    @Test
+    public void shouldSearchByAndReturnNoProducts() {
+        doReturn(returned).when(repository).findAll();
+
+        Product[] actual = manager.searchBy("14");
+        Product[] expected = new Product[0];
+        assertArrayEquals(expected, actual);
+        verify(repository).findAll();
+    }
+
+    @Test
+    public void shouldMatchesAndReturnTrue() {
+        boolean actual = manager.matches(phone, "S21");
+        assertTrue(actual);
+    }
+
+    @Test
+    public void shouldMatchesAndReturnFalse() {
+        boolean actual = manager.matches(phone, "S20");
+        assertFalse(actual);
+    }
 }
+

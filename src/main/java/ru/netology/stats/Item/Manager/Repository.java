@@ -1,35 +1,36 @@
 package ru.netology.stats.Item.Manager;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import java.util.Arrays;
+
+@NoArgsConstructor
+@AllArgsConstructor
 public class Repository {
-
-
     private Product[] products = new Product[0];
 
-    public void add(Product product) {
-        Product[] tmp = new Product[products.length + 1];
-        for (int i = 0; i < products.length; i++) {
-            tmp[i] = products[i];
-        }
-        tmp[tmp.length - 1] = product;
-        products = tmp;
-
+    public Product[] findAll() {
+        return this.products;
     }
 
+    public void save(Product product) {
+        int length = products.length + 1;
+        Product[] tmp = Arrays.copyOf(products, length);
+        tmp[length - 1] = product;
+        products = tmp;
+    }
 
-    public void removeByID(int id) {
-        Product[] tmp = new Product[products.length - 1];
-        int copyToIndex = 0;
-        for (Product product : products) {
-            if (product.getId() != id) {
-                tmp[copyToIndex] = product;
-                copyToIndex++;
+    public void removeById(int id) {
+        int length = products.length - 1;
+        Product[] tmp = new Product[length];
+        int index = 0;
+        for (Product movie : products) {
+            if (movie.getId() != id) {
+                if (index == length) return;
+                tmp[index] = movie;
+                index++;
             }
         }
         products = tmp;
-
-    }
-
-    public Product[] findAll() {
-        return products;
     }
 }
